@@ -10,6 +10,7 @@ import {
   ArrowLeftRight,
   Package,
   SlidersHorizontal,
+  Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,7 @@ export default function Sidebar({ menuOpen, setMenuOpen }: SidebarProps) {
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/sales", label: "Sales", icon: ShoppingCart },
     { href: "/purchases", label: "Purchases", icon: ShoppingBag },
+    { href: "/suppliers", label: "Suppliers", icon: Truck },
   ];
 
   const inventoryItems: NavItem[] = [

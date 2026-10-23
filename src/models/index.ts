@@ -1,5 +1,11 @@
 export { default as Sale, type ISale } from "./Sale";
-export { default as Purchase, type IPurchase } from "./Purchase";
+export {
+  default as Purchase,
+  type IPurchase,
+  type IPurchaseItem,
+  type PurchaseStatus,
+  type PurchasePaymentStatus,
+} from "./Purchase";
 export { default as ProfitTaking, type IProfitTaking } from "./ProfitTaking";
 export { default as Balance, type IBalance } from "./Balance";
 export {
@@ -20,3 +26,10 @@ export {
   type IProduct,
   type IVehicleFitment,
 } from "./Product";
+export { default as Supplier, type ISupplier } from "./Supplier";
+export {
+  default as SupplierPayment,
+  type ISupplierPayment,
+  type PaymentMethod,
+  type PaymentStatus as SupplierPaymentStatus,
+} from "./SupplierPayment";
