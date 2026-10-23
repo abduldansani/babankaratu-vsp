@@ -1,12 +1,24 @@
 "use server";
 
 import dbConnect from "@/lib/dbConnect";
-import { Sale, Purchase, ProfitTaking, OutstandingPayment } from "@/models";
+import {
+  Sale,
+  Purchase,
+  ProfitTaking,
+  OutstandingPayment,
+  CustomerPayment,
+} from "@/models";
 
 export interface TransactionItem {
   id: string;
   date: string;
-  type: "Sale" | "Purchase" | "Transport" | "Profit" | "Debt Settlement";
+  type:
+    | "Sale"
+    | "Purchase"
+    | "Transport"
+    | "Profit"
+    | "Debt Settlement"
+    | "Customer Payment";
   description: string;
   direction: "in" | "out";
   amount: number;
@@ -22,25 +34,58 @@ export interface TransactionsReport {
 export async function getTransactions(): Promise<TransactionsReport> {
   await dbConnect();
 
-  const [sales, purchases, profits, outstandings] = await Promise.all([
-    Sale.find().sort({ saleDate: -1 }).limit(60).lean(),
-    Purchase.find().sort({ purchaseDate: -1 }).limit(60).lean(),
-    ProfitTaking.find().sort({ takenAt: -1 }).limit(60).lean(),
-    OutstandingPayment.find().sort({ paidAt: -1 }).limit(60).lean(),
-  ]);
+  const [legacySales, customerPayments, purchases, profits, outstandings] =
+    await Promise.all([
+      // Only legacy sales that didn't generate CustomerPayment records
+      Sale.find({
+        $or: [
+          { isLegacy: true },
+          { items: { $size: 0 } },
+          { saleNumber: { $exists: false } },
+        ],
+      })
+        .sort({ saleDate: -1 })
+        .limit(60)
+        .lean(),
+      CustomerPayment.find({ status: "active" })
+        .sort({ paymentDate: -1 })
+        .limit(60)
+        .lean(),
+      Purchase.find().sort({ purchaseDate: -1 }).limit(60).lean(),
+      ProfitTaking.find().sort({ takenAt: -1 }).limit(60).lean(),
+      OutstandingPayment.find().sort({ paidAt: -1 }).limit(60).lean(),
+    ]);
 
   const items: TransactionItem[] = [];
 
-  sales.forEach((s) => {
+  // Legacy counter sales
+  legacySales.forEach((s: any) => {
     items.push({
       id: s._id.toString(),
       date: new Date(s.saleDate || s.createdAt).toISOString(),
       type: "Sale",
-      description: `Spare parts sale (${s.notes || "Bicycle & Motorcycle parts"})`,
+      description: `Legacy spare parts sale (${s.notes || "Bicycle & Motorcycle parts"})`,
       direction: "in",
       amount: s.totalAmount || 0,
     });
   });
+
+  // Customer payments (both initial sale payments and subsequent repayments)
+  customerPayments.forEach((p: any) => {
+    items.push({
+      id: p._id.toString(),
+      date: new Date(p.paymentDate || p.createdAt).toISOString(),
+      type: "Customer Payment",
+      description:
+        p.notes ||
+        (p.customerName
+          ? `Customer payment (${p.customerName} - ${p.paymentNumber})`
+          : `Customer payment (${p.paymentNumber})`),
+      direction: "in",
+      amount: p.amount || 0,
+    });
+  });
+
 
   purchases.forEach((p) => {
     if (p.paid > 0) {

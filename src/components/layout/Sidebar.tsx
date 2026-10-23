@@ -11,6 +11,7 @@ import {
   Package,
   SlidersHorizontal,
   Truck,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,7 @@ export default function Sidebar({ menuOpen, setMenuOpen }: SidebarProps) {
   const operationsItems: NavItem[] = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/sales", label: "Sales", icon: ShoppingCart },
+    { href: "/customers", label: "Customers", icon: Users },
     { href: "/purchases", label: "Purchases", icon: ShoppingBag },
     { href: "/suppliers", label: "Suppliers", icon: Truck },
   ];

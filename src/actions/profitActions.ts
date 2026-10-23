@@ -28,7 +28,12 @@ export async function getProfitOverview(): Promise<ProfitOverview> {
 
   const [salesAgg, purchasesAgg, profitTakingDocs] = await Promise.all([
     Sale.aggregate([
-      { $match: { saleDate: { $gte: startDate, $lte: endDate } } },
+      {
+        $match: {
+          saleDate: { $gte: startDate, $lte: endDate },
+          status: { $ne: "cancelled" },
+        },
+      },
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
     ]),
     Purchase.aggregate([

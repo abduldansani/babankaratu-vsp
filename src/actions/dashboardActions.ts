@@ -8,6 +8,7 @@ export interface DashboardMetrics {
   totalSales: number;
   availableCash: number;
   outstandingBalance: number;
+  customerDebt: number;
   totalPurchases: number;
   totalProfitTaken: number;
   monthSalesCount: number;
@@ -19,9 +20,14 @@ export async function getDashboardSummary(): Promise<DashboardMetrics> {
   const now = new Date();
   const { startDate, endDate } = getMonthDateRange(now);
 
-  // Sales in current month
+  // Sales in current month (exclude cancelled)
   const salesAgg = await Sale.aggregate([
-    { $match: { saleDate: { $gte: startDate, $lte: endDate } } },
+    {
+      $match: {
+        saleDate: { $gte: startDate, $lte: endDate },
+        status: { $ne: "cancelled" },
+      },
+    },
     {
       $group: {
         _id: null,
@@ -61,6 +67,7 @@ export async function getDashboardSummary(): Promise<DashboardMetrics> {
     totalSales: salesAgg[0]?.total ?? 0,
     availableCash: balanceDoc?.availableBalance ?? 0,
     outstandingBalance: balanceDoc?.totalOutstanding ?? 0,
+    customerDebt: balanceDoc?.customerDebt ?? 0,
     totalPurchases: purchasesAgg[0]?.totalPaid ?? 0,
     totalProfitTaken: profitAgg[0]?.total ?? 0,
     monthSalesCount: salesAgg[0]?.count ?? 0,

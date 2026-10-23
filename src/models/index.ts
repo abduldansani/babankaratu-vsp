@@ -1,4 +1,21 @@
-export { default as Sale, type ISale } from "./Sale";
+export {
+  default as Sale,
+  type ISale,
+  type ISaleItem,
+  type SaleStatus,
+  type SalePaymentStatus,
+} from "./Sale";
+export {
+  default as Customer,
+  type ICustomer,
+} from "./Customer";
+export {
+  default as CustomerPayment,
+  type ICustomerPayment,
+  type IPaymentAllocation,
+  type CustomerPaymentMethod,
+  type CustomerPaymentStatus,
+} from "./CustomerPayment";
 export {
   default as Purchase,
   type IPurchase,
@@ -33,3 +50,4 @@ export {
   type PaymentMethod,
   type PaymentStatus as SupplierPaymentStatus,
 } from "./SupplierPayment";
+
